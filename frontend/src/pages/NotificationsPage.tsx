@@ -91,14 +91,15 @@ export const NotificationsPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       {/* Page header */}
-      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <p className="eyebrow">Workspace updates</p>
-          <h1 className="mt-2.5 text-[1.75rem] font-semibold tracking-tight">Notifications</h1>
-          <p className="mt-2 text-[15px] text-slate-500">
-            Reviews, assignments, and project activity that need your attention.
+          <h1 className="text-xl font-semibold tracking-tight text-slate-900">
+            Notifications
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Reviews, team invitations, and workspace activity requiring attention.
           </p>
         </div>
         <button className="btn-secondary" onClick={allRead}>
@@ -107,14 +108,14 @@ export const NotificationsPage: React.FC = () => {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-100 bg-rose-50 p-4 text-sm text-rose-700">
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-3.5 text-sm text-rose-700">
           {error}
         </div>
       )}
 
       <section className="surface overflow-hidden">
         {loading ? (
-          <div className="p-14 text-center text-sm text-slate-500">Loading notifications…</div>
+          <div className="p-12 text-center text-sm text-slate-500">Loading notifications…</div>
         ) : items.length ? (
           <div className="divide-y divide-slate-100">
             {items.map((item) => {
@@ -132,69 +133,71 @@ export const NotificationsPage: React.FC = () => {
               return (
                 <div
                   key={item.id}
-                  className={`flex gap-4 p-5 sm:p-6 transition-colors ${read ? '' : 'bg-indigo-50/30'}`}
+                  className={`flex gap-3.5 p-4 sm:p-5 transition-colors ${
+                    read ? 'bg-white' : 'bg-slate-50/80 border-l-2 border-indigo-600'
+                  }`}
                 >
                   <div
-                    className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                      read ? 'bg-slate-100 text-slate-400' : 'bg-indigo-100 text-indigo-600'
+                    className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${
+                      read ? 'bg-slate-100 text-slate-400' : 'bg-indigo-50 text-indigo-600'
                     }`}
                   >
-                    <Bell size={17} />
+                    <Bell size={15} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <h2 className="font-semibold text-slate-800">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <h2 className="text-sm font-semibold text-slate-900">
                         {item.title || 'Project update'}
                       </h2>
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs font-mono text-slate-400">
                         {formatDate(item.createdAt)}
                       </span>
                     </div>
-                    <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
+                    <p className="mt-1 text-xs leading-relaxed text-slate-600">
                       {item.message ||
                         item.body ||
                         'A new activity was recorded in your workspace.'}
                     </p>
-                    <div className="mt-3.5 flex items-center gap-3">
+                    <div className="mt-3 flex items-center gap-2">
                       {isPending ? (
                         <>
                           <button
-                            className="btn-primary px-3.5 py-1.5 text-xs font-semibold"
+                            className="btn-primary px-3 py-1 text-xs"
                             onClick={() => respond(item, 'ACCEPT')}
                           >
                             Accept
                           </button>
                           <button
-                            className="rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50"
+                            className="btn-secondary px-3 py-1 text-xs text-rose-600 hover:bg-rose-50"
                             onClick={() => respond(item, 'REJECT')}
                           >
-                            Reject
+                            Decline
                           </button>
                         </>
                       ) : isAccepted ? (
-                        <span className="inline-flex items-center rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                        <span className="badge bg-emerald-50 text-emerald-700 border-emerald-200">
                           Request accepted
                         </span>
                       ) : isRejected ? (
-                        <span className="inline-flex items-center rounded-lg bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700">
-                          Request not accepted
+                        <span className="badge bg-rose-50 text-rose-700 border-rose-200">
+                          Request declined
                         </span>
                       ) : (
                         <>
                           {!read && (
                             <button
-                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 transition hover:text-indigo-700"
+                              className="btn-ghost"
                               onClick={() => mark(item)}
                             >
-                              <Check size={14} /> Mark read
+                              <Check size={13} /> Mark read
                             </button>
                           )}
                           {item.link && (
                             <button
-                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-slate-700"
+                              className="btn-ghost"
                               onClick={() => navigate(String(item.link))}
                             >
-                              <ExternalLink size={13} /> Open related item
+                              <ExternalLink size={13} /> Open item
                             </button>
                           )}
                         </>
@@ -206,9 +209,9 @@ export const NotificationsPage: React.FC = () => {
             })}
           </div>
         ) : (
-          <div className="p-16 text-center">
-            <Bell className="mx-auto text-slate-300" size={32} />
-            <p className="mt-4 text-sm text-slate-500">You're all caught up.</p>
+          <div className="p-12 text-center">
+            <Bell className="mx-auto text-slate-300" size={28} />
+            <p className="mt-3 text-xs text-slate-500">You are all caught up on project activity.</p>
           </div>
         )}
       </section>

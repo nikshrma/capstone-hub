@@ -26,105 +26,124 @@ export const FacultyPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       {/* Page header */}
       <div>
-        <p className="eyebrow">Faculty command center</p>
-        <h1 className="mt-2.5 text-[1.75rem] font-semibold tracking-tight text-slate-900">
-          Project oversight
+        <h1 className="text-xl font-semibold tracking-tight text-slate-900">
+          Faculty Overview
         </h1>
-        <p className="mt-2 text-[15px] text-slate-500">
-          See progress, review queues, and delivery health across your advised teams.
+        <p className="mt-1 text-sm text-slate-500">
+          Requirement review queue, milestone health, and delivery metrics across advised projects.
         </p>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-100 bg-rose-50 p-4 text-sm text-rose-700">
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-3.5 text-sm text-rose-700">
           {error}
         </div>
       )}
 
-      {/* Metric cards */}
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric icon={FolderKanban} label="Projects overseen" value={metric(['totalProjects'])} />
+      {/* Metric summary row */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Metric
+          icon={FolderKanban}
+          label="Advised projects"
+          value={metric(['totalProjects'])}
+          meta="Registered cohorts"
+        />
         <Metric
           icon={ClipboardCheck}
-          label="Requirement reviews"
+          label="Pending reviews"
           value={metric(['pendingReviewsCount', 'totalPendingReviews'])}
+          meta="Awaiting evaluation"
         />
         <Metric
           icon={Gauge}
-          label="Milestone progress"
+          label="Average progress"
           value={
             metric(['overallAverageProgress']) +
             (dashboard.overallAverageProgress !== undefined ? '%' : '')
           }
+          meta="Milestone completion"
         />
         <Metric
           icon={Activity}
-          label="Unread notifications"
+          label="Unread updates"
           value={metric(['unreadNotificationsCount'])}
+          meta="Activity alerts"
         />
       </div>
 
-      {/* Projects section */}
-      <section>
-        <div className="mb-5 flex items-center justify-between">
+      {/* Advised projects section */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
           <div>
-            <p className="eyebrow">Portfolio health</p>
-            <h2 className="mt-1.5 text-xl font-semibold">Advised projects</h2>
+            <h2 className="text-base font-semibold text-slate-900">Advised projects</h2>
+            <p className="text-xs text-slate-500">Continuous milestone review and delivery health</p>
           </div>
-          <span className="text-sm text-slate-400">{projects.length} connected</span>
+          <span className="text-xs text-slate-400 font-mono">{projects.length} connected</span>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2">
-          {projects.map((project) => (
-            <Link
-              className="surface group p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-surface-hover"
-              to={`/projects/${project.id}`}
-              key={project.id}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
-                  <FolderKanban size={20} />
-                </div>
-                <ArrowUpRight
-                  className="text-slate-300 transition group-hover:text-violet-500"
-                  size={18}
-                />
-              </div>
-              <h3 className="mt-5 text-lg font-semibold text-slate-900">{project.name}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-500">
-                {project.description || 'Project progress overview and review workspace.'}
-              </p>
-
-              {/* Progress bar */}
-              <div className="mt-6">
-                <div className="mb-2 flex justify-between text-xs text-slate-400">
-                  <span>Overall progress</span>
-                  <span className="font-medium text-slate-600">
-                    {String(project.overallProgressPercentage ?? 0)}%
-                  </span>
-                </div>
-                <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                  <div
-                    className="h-full rounded-full bg-violet-500 transition-all duration-500"
-                    style={{
-                      width: `${Math.max(0, Math.min(100, Number(project.overallProgressPercentage ?? 0)))}%`,
-                    }}
+        <div className="grid gap-4 md:grid-cols-2">
+          {projects.map((project) => {
+            const progress = Math.max(0, Math.min(100, Number(project.overallProgressPercentage ?? 0)));
+            return (
+              <Link
+                key={project.id}
+                to={`/projects/${project.id}`}
+                className="surface group p-5 transition-colors duration-150 hover:border-slate-300 block"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="spec-key">
+                      PROJ-{String(project.id).replace(/^proj-?/i, '').slice(0, 4).toUpperCase() || '01'}
+                    </span>
+                    <span className="badge bg-slate-100 text-slate-700 border-slate-200">
+                      Cohort 2026
+                    </span>
+                  </div>
+                  <ArrowUpRight
+                    className="text-slate-400 transition-colors group-hover:text-indigo-600"
+                    size={16}
                   />
                 </div>
-              </div>
 
-              <div className="mt-5 flex items-center gap-2 text-xs text-slate-400">
-                <Users size={14} />
-                {project.team?.members?.length || project._count?.members || 0} team members
-              </div>
-            </Link>
-          ))}
+                <h3 className="mt-3 text-base font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                  {project.name}
+                </h3>
+                <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500">
+                  {project.description || 'Project progress overview and review workspace.'}
+                </p>
+
+                {/* Milestone progress bar */}
+                <div className="mt-4 pt-3 border-t border-slate-100">
+                  <div className="mb-1.5 flex justify-between text-xs font-mono text-slate-500">
+                    <span>Milestone progress</span>
+                    <span className="font-semibold text-slate-800">{progress}%</span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded bg-slate-100">
+                    <div
+                      className="h-full bg-indigo-600 transition-all duration-300 rounded"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between text-xs text-slate-500 font-mono">
+                  <span className="flex items-center gap-1.5">
+                    <Users size={13} className="text-slate-400" />
+                    {project.team?.members?.length || project._count?.members || 0} collaborators
+                  </span>
+                  <span className="text-slate-400 group-hover:text-indigo-600 transition-colors">
+                    Review workspace &rarr;
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
           {!projects.length && (
-            <div className="surface col-span-full p-14 text-center text-sm text-slate-500">
-              No faculty projects returned by the backend.
+            <div className="surface col-span-full p-12 text-center text-sm text-slate-500">
+              No faculty projects currently assigned.
             </div>
           )}
         </div>
@@ -137,16 +156,27 @@ const Metric = ({
   icon: Icon,
   label,
   value,
+  meta,
 }: {
   icon: React.ElementType;
   label: string;
-  value: string;
+  value: React.ReactNode;
+  meta?: string;
 }) => (
-  <div className="surface p-6">
-    <div className="mb-4 inline-flex rounded-xl bg-violet-50 p-2.5 text-violet-600">
-      <Icon size={18} />
+  <div className="surface p-4 flex flex-col justify-between">
+    <div className="flex items-center justify-between text-slate-500">
+      <span className="text-xs font-medium">{label}</span>
+      <Icon size={16} className="text-slate-400" />
     </div>
-    <p className="text-sm text-slate-500">{label}</p>
-    <p className="mt-1.5 text-2xl font-semibold tracking-tight text-slate-900">{value}</p>
+    <div className="mt-3">
+      <p className="text-2xl font-semibold tracking-tight text-slate-900 tabular-nums">
+        {value}
+      </p>
+      {meta && (
+        <p className="mt-1 text-[11px] text-slate-400 font-mono">
+          {meta}
+        </p>
+      )}
+    </div>
   </div>
 );

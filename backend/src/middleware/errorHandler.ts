@@ -20,8 +20,24 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction
 ): void => {
-  const statusCode = err instanceof AppError ? err.statusCode : 500;
-  const message = err.message || 'Internal Server Error';
+  const isAppError = err instanceof AppError && err.isOperational;
+  const statusCode = isAppError ? err.statusCode : 500;
+
+  // Log raw error on the server console for debugging
+  console.error('[Error Handler]', err);
+
+  let userSafeMessage = 'Internal Server Error';
+
+  if (isAppError) {
+    userSafeMessage = err.message;
+  } else if (err.message && (err.message.includes("Can't reach database server") || err.name?.includes('PrismaClient'))) {
+    userSafeMessage = 'Database service is currently unreachable. Please check the database server.';
+  } else if (config.nodeEnv === 'development') {
+    // In dev, provide a clean single-line description without raw Prisma queries or file paths
+    userSafeMessage = err.message ? err.message.split('\n').filter(Boolean).pop()?.trim() || 'Internal Server Error' : 'Internal Server Error';
+  } else {
+    userSafeMessage = 'An unexpected server error occurred. Please try again later.';
+  }
 
   const response: {
     success: boolean;
@@ -29,10 +45,10 @@ export const errorHandler = (
     stack?: string;
   } = {
     success: false,
-    message,
+    message: userSafeMessage,
   };
 
-  if (config.nodeEnv === 'development' && !(err instanceof AppError && err.isOperational)) {
+  if (config.nodeEnv === 'development' && !isAppError) {
     response.stack = err.stack;
   }
 

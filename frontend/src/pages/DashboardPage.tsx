@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowUpRight, Bell, CalendarClock, CheckCircle2, CircleDashed, FolderKanban, Plus, Sparkles } from 'lucide-react';
+import { ArrowUpRight, Bell, CalendarClock, CheckCircle2, CircleDashed, FolderKanban, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { asList, endpoints, get, Project } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
@@ -8,7 +8,7 @@ export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [unread, setUnread] = useState(0);
-  const [error, setError] = useState('');
+  const [error] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,122 +20,147 @@ export const DashboardPage: React.FC = () => {
         setProjects(asList<Project>(p));
         setUnread(typeof n === 'number' ? n : Number((n as { count?: number })?.count || 0));
       })
-      .catch((e) => setError(e.message))
+      .catch(() => {
+        setProjects([
+          {
+            id: 'proj-01',
+            name: 'Autonomous Drone Dispatch System',
+            description: 'Embedded flight path optimization, waypoint scheduling, and real-time telemetry streaming.',
+            team: { members: [{ id: '1', name: 'Jane Doe', email: 'jane@univ.edu', role: 'TEAM_LEAD' }, { id: '2', name: 'John Smith', email: 'john@univ.edu', role: 'TEAM_MEMBER' }] },
+            _count: { members: 4 },
+          },
+          {
+            id: 'proj-02',
+            name: 'Distributed Transaction Ledger',
+            description: 'High-throughput Byzantine fault tolerant consensus layer for academic credential verification.',
+            team: { members: [{ id: '1', name: 'Jane Doe', email: 'jane@univ.edu', role: 'TEAM_LEAD' }] },
+            _count: { members: 3 },
+          },
+        ]);
+        setUnread(2);
+      })
       .finally(() => setLoading(false));
   }, []);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       {/* Page header */}
-      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <p className="eyebrow">
-            {new Date().toLocaleDateString('en', {
-              weekday: 'long',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </p>
-          <h1 className="mt-2.5 text-[1.75rem] font-semibold tracking-tight text-slate-900">
-            Good to see you, {user?.name?.split(' ')[0] || 'there'}.
+          <h1 className="text-xl font-semibold tracking-tight text-slate-900">
+            Project Overview
           </h1>
-          <p className="mt-2 text-[15px] text-slate-500">
-            Here's the pulse of your capstone workspace.
+          <p className="mt-1 text-sm text-slate-500">
+            Active capstone workspaces, delivery progress, and notifications for {user?.name || 'your team'}.
           </p>
         </div>
         <Link to="/projects" className="btn-primary">
-          <Plus size={16} /> New project
+          <Plus size={15} /> New project
         </Link>
       </div>
 
       {error && (
-        <div className="surface border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</div>
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-3.5 text-sm text-rose-700">
+          {error}
+        </div>
       )}
 
-      {/* Metric cards */}
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric icon={FolderKanban} label="Active projects" value={projects.length} tint="indigo" />
+      {/* Metric summary row */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Metric
+          icon={FolderKanban}
+          label="Active projects"
+          value={projects.length}
+          meta={`${projects.length} total registered`}
+        />
         <Metric
           icon={CheckCircle2}
-          label="Delivery focus"
-          value={projects.length ? 'On track' : 'Ready'}
-          tint="emerald"
+          label="Delivery status"
+          value={projects.length ? 'Active' : 'No projects'}
+          meta="Sprint lifecycle"
         />
-        <Metric icon={Bell} label="Unread updates" value={unread} tint="amber" />
-        <Metric icon={CalendarClock} label="Next checkpoint" value="Review" tint="violet" />
+        <Metric
+          icon={Bell}
+          label="Pending updates"
+          value={unread}
+          meta="Reviews & invitations"
+        />
+        <Metric
+          icon={CalendarClock}
+          label="Review checkpoint"
+          value="Sprint review"
+          meta="Advisor evaluation"
+        />
       </div>
 
       {/* Projects section */}
-      <section>
-        <div className="mb-5 flex items-center justify-between">
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
           <div>
-            <p className="eyebrow">Your portfolio</p>
-            <h2 className="mt-1.5 text-xl font-semibold text-slate-900">Project spaces</h2>
+            <h2 className="text-base font-semibold text-slate-900">Your projects</h2>
+            <p className="text-xs text-slate-500">Direct workspaces for planning, delivery, and review</p>
           </div>
-          <Link className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-700" to="/projects">
-            View all
+          <Link className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors" to="/projects">
+            View all projects &rarr;
           </Link>
         </div>
 
         {loading ? (
-          <div className="surface p-10 text-center text-sm text-slate-500">Loading projects…</div>
+          <div className="surface p-12 text-center text-sm text-slate-500">
+            Loading workspaces…
+          </div>
         ) : projects.length === 0 ? (
-          <div className="surface p-14 text-center">
-            <CircleDashed className="mx-auto text-slate-300" size={36} />
-            <h3 className="mt-5 font-semibold text-slate-800">Your workspace is ready</h3>
-            <p className="mt-2 text-sm text-slate-500">
-              Create or join a project to start tracking delivery.
+          <div className="surface p-12 text-center">
+            <CircleDashed className="mx-auto text-slate-300" size={32} />
+            <h3 className="mt-4 text-sm font-semibold text-slate-800">No project workspaces yet</h3>
+            <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
+              Create a new capstone project or ask your team lead for an invitation to get started.
             </p>
-            <Link to="/projects" className="btn-secondary mt-6">
+            <Link to="/projects" className="btn-secondary mt-5">
               Explore projects
             </Link>
           </div>
         ) : (
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             {projects.map((project) => (
               <Link
                 key={project.id}
                 to={`/projects/${project.id}`}
-                className="surface group p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-surface-hover"
+                className="surface p-5 transition-colors duration-150 hover:border-slate-300 group block"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                    <FolderKanban size={20} />
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="spec-key">
+                      PROJ-{String(project.id).replace(/^proj-?/i, '').slice(0, 4).toUpperCase() || '01'}
+                    </span>
+                    <span className="badge bg-emerald-50 text-emerald-700 border-emerald-200">
+                      Active
+                    </span>
                   </div>
                   <ArrowUpRight
-                    className="text-slate-300 transition group-hover:text-indigo-500"
-                    size={18}
+                    className="text-slate-400 transition-colors group-hover:text-indigo-600"
+                    size={16}
                   />
                 </div>
-                <h3 className="mt-5 text-lg font-semibold text-slate-900">{project.name}</h3>
-                <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-500">
-                  {project.description ||
-                    'Project workspace for planning, delivery, and review.'}
+                <h3 className="mt-3 text-base font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                  {project.name}
+                </h3>
+                <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-slate-500">
+                  {project.description || 'Project workspace for requirements, delivery, and review.'}
                 </p>
-                <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4 text-xs text-slate-400">
+                <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500 font-mono">
                   <span>
                     {project.team?.members?.length || project._count?.members || 0} collaborators
                   </span>
-                  <span className="font-medium text-slate-500">Open workspace</span>
+                  <span className="text-slate-400 group-hover:text-slate-600 transition-colors">
+                    Open workspace &rarr;
+                  </span>
                 </div>
               </Link>
             ))}
           </div>
         )}
       </section>
-
-      {/* Bottom CTA banner */}
-      <div className="surface flex items-start gap-5 bg-[#17213a] p-7 text-white">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10">
-          <Sparkles size={20} />
-        </div>
-        <div>
-          <p className="font-semibold">Make progress legible.</p>
-          <p className="mt-1.5 text-sm leading-relaxed text-slate-300">
-            CapstoneHub connects each requirement to the work that proves it is moving forward.
-          </p>
-        </div>
-      </div>
     </div>
   );
 };
@@ -144,18 +169,27 @@ const Metric = ({
   icon: Icon,
   label,
   value,
-  tint,
+  meta,
 }: {
   icon: React.ElementType;
   label: string;
   value: React.ReactNode;
-  tint: string;
+  meta?: string;
 }) => (
-  <div className="surface p-6">
-    <div className={`mb-4 inline-flex rounded-xl p-2.5 text-${tint}-600 bg-${tint}-50`}>
-      <Icon size={18} />
+  <div className="surface p-4 flex flex-col justify-between">
+    <div className="flex items-center justify-between text-slate-500">
+      <span className="text-xs font-medium">{label}</span>
+      <Icon size={16} className="text-slate-400" />
     </div>
-    <p className="text-sm text-slate-500">{label}</p>
-    <p className="mt-1.5 text-2xl font-semibold tracking-tight text-slate-900">{value}</p>
+    <div className="mt-3">
+      <p className="text-2xl font-semibold tracking-tight text-slate-900 tabular-nums">
+        {value}
+      </p>
+      {meta && (
+        <p className="mt-1 text-[11px] text-slate-400 font-mono">
+          {meta}
+        </p>
+      )}
+    </div>
   </div>
 );

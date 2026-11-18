@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Bell,
   ChevronDown,
+  FolderGit2,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -29,15 +30,15 @@ export const Layout: React.FC = () => {
     ? [{ to: '/faculty/dashboard', label: 'Faculty overview', icon: ShieldCheck }]
     : [
         { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { to: '/projects', label: 'Projects', icon: PanelLeftOpen },
+        { to: '/projects', label: 'Projects', icon: FolderGit2 },
       ];
 
   const activeProject = location.pathname.match(/\/projects\/([^/]+)/)?.[1];
   if (activeProject && !links.some((l) => location.pathname.startsWith(l.to))) {
     links.push({
       to: `/projects/${activeProject}`,
-      label: 'Current project',
-      icon: PanelLeftOpen,
+      label: 'Current workspace',
+      icon: FolderGit2,
     });
   }
 
@@ -88,94 +89,111 @@ export const Layout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f8fc] text-slate-900">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col lg:flex-row">
       {/* Mobile overlay */}
       {mobile && (
         <div
-          className="fixed inset-0 z-30 bg-slate-900/30 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-xs lg:hidden"
           onClick={() => setMobile(false)}
         />
       )}
 
+      {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[17rem] flex-col border-r border-slate-200/80 bg-white transition-all duration-200 ${
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col border-r border-slate-200 bg-white transition-all duration-150 ${
           mobile ? 'translate-x-0' : '-translate-x-full'
-        } lg:translate-x-0 ${collapsed ? 'lg:w-[4.5rem]' : ''}`}
+        } lg:translate-x-0 ${collapsed ? 'w-16' : 'w-64'}`}
       >
-        {/* Logo */}
-        <div className="flex h-[4.25rem] items-center justify-between border-b border-slate-100 px-5">
+        {/* Brand header */}
+        <div className="flex h-14 items-center justify-between border-b border-slate-200 px-4">
           <button
             onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-3 font-bold text-slate-900"
+            className="flex items-center gap-2.5 text-left focus:outline-none"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
-              <PanelLeftOpen size={17} />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white font-mono text-xs font-semibold">
+              CH
             </div>
-            {!collapsed && <span className="text-[15px]">CapstoneHub</span>}
+            {!collapsed && (
+              <div className="min-w-0">
+                <span className="block text-sm font-semibold tracking-tight text-slate-900 leading-tight">
+                  CapstoneHub
+                </span>
+                <span className="block text-[11px] text-slate-500 font-normal leading-tight">
+                  Academic SE Platform
+                </span>
+              </div>
+            )}
           </button>
-          <button className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 lg:hidden" onClick={() => setMobile(false)}>
+          <button
+            className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 lg:hidden"
+            onClick={() => setMobile(false)}
+            aria-label="Close menu"
+          >
             <X size={18} />
           </button>
         </div>
 
         {/* Navigation links */}
-        <nav className="flex-1 space-y-1 px-3 py-4">
+        <nav className="flex-1 space-y-1 p-3">
+          {!collapsed && (
+            <p className="px-3 pt-2 pb-1.5 text-[11px] font-medium text-slate-400">
+              Workspace
+            </p>
+          )}
           {links.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
               onClick={() => setMobile(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-[13px] font-medium transition-all duration-150 ${
+                `flex h-9 items-center gap-2.5 rounded-lg px-3 text-sm font-medium transition-colors duration-150 ${
                   isActive
-                    ? 'bg-indigo-50 text-indigo-700 shadow-sm shadow-indigo-100/50'
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+                    ? 'bg-indigo-50 text-indigo-700'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`
               }
+              title={collapsed ? link.label : undefined}
             >
-              <link.icon size={17} strokeWidth={2} />
-              {!collapsed && link.label}
+              <link.icon size={16} className="shrink-0" />
+              {!collapsed && <span>{link.label}</span>}
             </NavLink>
           ))}
-
-          {/* Workflow card */}
-          {!collapsed && (
-            <div className="mt-8 rounded-2xl bg-[#17213a] p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-indigo-300">Workflow</p>
-              <p className="mt-2.5 text-[13px] leading-relaxed text-slate-300">
-                Connect planning decisions to the evidence that matters.
-              </p>
-            </div>
-          )}
         </nav>
 
-        {/* Sign out */}
-        <div className="border-t border-slate-100 px-3 py-3">
+        {/* Sign out footer */}
+        <div className="border-t border-slate-200 p-3">
           <button
             onClick={handleSignOut}
-            className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-[13px] font-medium text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
+            className="flex h-9 w-full items-center gap-2.5 rounded-lg px-3 text-sm font-medium text-slate-600 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-900"
+            title={collapsed ? 'Sign out' : undefined}
           >
-            <LogOut size={17} />
-            {!collapsed && 'Sign out'}
+            <LogOut size={16} className="shrink-0 text-slate-400" />
+            {!collapsed && <span>Sign out</span>}
           </button>
         </div>
       </aside>
 
-      <div className={`transition-all duration-200 ${collapsed ? 'lg:pl-[4.5rem]' : 'lg:pl-[17rem]'}`}>
-        {/* Top header bar */}
-        <header className="sticky top-0 z-30 flex h-[4.25rem] items-center justify-between border-b border-slate-200/60 bg-[#f7f8fc]/80 px-5 backdrop-blur-lg sm:px-8">
+      {/* Main content wrapper */}
+      <div className={`flex-1 transition-all duration-150 ${collapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>
+        {/* Sticky top header */}
+        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-slate-200 bg-white/90 px-4 sm:px-8 backdrop-blur-xs">
           <div className="flex items-center gap-3">
-            <button className="rounded-lg p-2 text-slate-500 hover:bg-white lg:hidden" onClick={() => setMobile(true)}>
-              <Menu size={20} />
+            <button
+              className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 lg:hidden"
+              onClick={() => setMobile(true)}
+              aria-label="Open menu"
+            >
+              <Menu size={18} />
             </button>
             <button
-              className="hidden rounded-lg p-2 text-slate-400 transition hover:bg-white hover:text-slate-600 lg:block"
+              className="hidden rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 lg:block"
               onClick={() => setCollapsed(!collapsed)}
+              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
-              {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+              {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
             </button>
-            <span className="hidden text-[13px] text-slate-400 sm:inline">
-              Academic delivery workspace
+            <span className="hidden text-xs text-slate-400 sm:inline font-mono">
+              / {faculty ? 'faculty-portal' : 'workspace'}
             </span>
           </div>
 
@@ -183,62 +201,62 @@ export const Layout: React.FC = () => {
             {/* Notification bell */}
             <button
               onClick={() => navigate('/notifications')}
-              className="relative rounded-xl p-2.5 text-slate-500 transition hover:bg-white hover:text-slate-700"
+              className="relative flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              aria-label="Notifications"
             >
-              <Bell size={18} />
+              <Bell size={16} />
               {unread > 0 && (
-                <span className="absolute right-1 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white">
+                <span className="absolute right-1 top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-indigo-600 px-1 font-mono text-[10px] font-semibold text-white tabular-nums">
                   {unread > 9 ? '9+' : unread}
                 </span>
               )}
             </button>
 
-            {/* User Profile Pill & Dropdown Menu */}
+            {/* User profile dropdown */}
             <div className="relative" ref={userMenuRef}>
               <button
                 type="button"
                 onClick={() => setUserMenuOpen((prev) => !prev)}
-                className="flex items-center gap-2.5 rounded-xl border border-transparent p-1.5 pl-2.5 transition-all hover:border-slate-200 hover:bg-white/80 focus:outline-none"
+                className="flex items-center gap-2 rounded-lg p-1.5 pl-2 transition-colors hover:bg-slate-100 focus:outline-none"
                 aria-expanded={userMenuOpen}
                 aria-haspopup="true"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-[13px] font-bold text-indigo-700">
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-100 text-xs font-semibold text-slate-700 font-mono">
                   {initials(user?.name)}
                 </div>
                 <div className="hidden text-left sm:block">
-                  <p className="text-[13px] font-semibold leading-tight text-slate-800">
+                  <p className="text-xs font-medium leading-none text-slate-800">
                     {user?.name || 'User'}
                   </p>
-                  <p className="text-[11px] capitalize text-slate-400">
-                    {user?.role?.toLowerCase().replace(/_/g, ' ') || 'student'}
+                  <p className="text-[11px] text-slate-500 font-normal leading-tight mt-0.5">
+                    {user?.role === 'FACULTY' ? 'Faculty Advisor' : user?.role === 'TEAM_LEAD' ? 'Team Lead' : 'Team Member'}
                   </p>
                 </div>
                 <ChevronDown
                   size={14}
-                  className={`hidden text-slate-400 transition-transform duration-200 sm:block ${
+                  className={`hidden text-slate-400 transition-transform duration-150 sm:block ${
                     userMenuOpen ? 'rotate-180' : ''
                   }`}
                 />
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 mt-2 w-60 rounded-2xl border border-slate-200/80 bg-white p-2 shadow-modal z-50 animate-toast-in">
-                  <div className="border-b border-slate-100 px-3 py-3">
-                    <p className="text-sm font-semibold text-slate-900 truncate">
+                <div className="absolute right-0 mt-1 w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-modal z-50 animate-toast-in">
+                  <div className="border-b border-slate-100 px-2.5 py-2">
+                    <p className="text-xs font-semibold text-slate-900 truncate">
                       {user?.name || 'User'}
                     </p>
-                    <p className="text-xs text-slate-500 truncate mt-0.5">{user?.email || ''}</p>
-                    <span className="mt-2.5 inline-flex items-center rounded-lg bg-indigo-50 px-2 py-0.5 text-[11px] font-medium capitalize text-indigo-700">
-                      {user?.role?.toLowerCase().replace(/_/g, ' ') || 'student'}
-                    </span>
+                    <p className="text-[11px] text-slate-500 truncate mt-0.5 font-mono">
+                      {user?.email || ''}
+                    </p>
                   </div>
-                  <div className="pt-1.5">
+                  <div className="pt-1">
                     <button
                       type="button"
                       onClick={handleSignOut}
-                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-600 transition hover:bg-rose-50"
+                      className="flex h-8 w-full items-center gap-2 rounded-md px-2.5 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50"
                     >
-                      <LogOut size={15} /> Sign out
+                      <LogOut size={14} /> Sign out
                     </button>
                   </div>
                 </div>
@@ -247,7 +265,8 @@ export const Layout: React.FC = () => {
           </div>
         </header>
 
-        <main className="mx-auto max-w-[1440px] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
+        {/* Page body */}
+        <main className="mx-auto max-w-[1400px] p-4 sm:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>

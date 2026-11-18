@@ -3,31 +3,27 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  safelist: [
-    // Dynamic tint classes used by Metric component
-    { pattern: /text-(indigo|emerald|amber|violet)-600/ },
-    { pattern: /bg-(indigo|emerald|amber|violet)-50/ },
-  ],
   theme: {
     extend: {
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
       },
       fontSize: {
         '2xs': ['0.6875rem', { lineHeight: '1rem' }],  // 11px
       },
       boxShadow: {
-        'surface': '0 1px 3px rgba(20,32,55,0.04), 0 8px 24px rgba(20,32,55,0.04)',
-        'surface-hover': '0 4px 12px rgba(20,32,55,0.08), 0 12px 32px rgba(20,32,55,0.06)',
-        'modal': '0 24px 48px rgba(20,32,55,0.16), 0 4px 12px rgba(20,32,55,0.06)',
+        'xs': '0 1px 2px 0 rgba(15, 23, 42, 0.05)',
+        'sm': '0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.06)',
+        'modal': '0 12px 32px -4px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.04)',
       },
       animation: {
-        'toast-in': 'toastIn 0.28s ease-out both',
+        'toast-in': 'toastIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) both',
       },
       keyframes: {
         toastIn: {
-          '0%': { opacity: '0', transform: 'translateY(-12px) scale(0.97)' },
-          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+          '0%': { opacity: '0', transform: 'translateY(-6px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
         },
       },
     },
