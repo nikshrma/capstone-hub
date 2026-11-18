@@ -25,6 +25,7 @@ export const createApp = (): Application => {
   app.use(requestLogger);
 
   app.use('/api', apiRouter);
+  app.use('/', apiRouter);
 
   app.use(notFoundHandler);
 
