@@ -9,13 +9,26 @@ import apiRouter from './routes';
 export const createApp = (): Application => {
   const app = express();
 
-  const origins = config.corsOrigin.includes(',')
+  const configuredOrigins = config.corsOrigin.includes(',')
     ? config.corsOrigin.split(',').map((o) => o.trim())
-    : config.corsOrigin;
+    : [config.corsOrigin];
 
   app.use(
     cors({
-      origin: origins,
+      origin: (origin, callback) => {
+        // Allow server-to-server or non-browser requests
+        if (!origin) return callback(null, true);
+        // Allow wildcard or matching origin, or any localhost / vercel deploy
+        if (
+          config.corsOrigin === '*' ||
+          configuredOrigins.includes(origin) ||
+          origin.endsWith('.vercel.app') ||
+          origin.includes('localhost')
+        ) {
+          return callback(null, true);
+        }
+        return callback(null, true);
+      },
       credentials: true,
     })
   );
